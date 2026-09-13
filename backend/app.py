@@ -111,8 +111,14 @@ def api_common_friends():
     if not a or not b:
         return jsonify({"error": "需要 node1 与 node2 参数"}), 400
 
-    friends = algorithms.common_friends(graph, a, b)
-    return jsonify({"friends": friends, "count": len(friends)})
+    # 排序需要同社群信号；与 /api/communities 共用缓存，口径一致
+    community = graph.community_map()
+    result = algorithms.rank_common_friends(graph, a, b, community=community)
+
+    # 状态严格区分：节点不存在 / 同一节点 / 确实没有共同好友，均不是错误参数，
+    # 用 status 字段判别；不存在时附带 404，与「没有共同好友」彻底分开
+    status_code = 404 if result["status"] == "node_missing" else 200
+    return jsonify(result), status_code
 
 
 @app.route("/api/pagerank", methods=["GET"])
@@ -133,7 +139,7 @@ def api_pagerank():
 @app.route("/api/communities", methods=["GET"])
 def api_communities():
     """返回社群划分结果与每个节点所属社群。"""
-    community = algorithms.louvain(graph)
+    community = graph.community_map()
     groups = algorithms.community_groups(community)
     return jsonify(
         {

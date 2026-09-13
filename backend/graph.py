@@ -65,6 +65,18 @@ class Graph:
     def node_ids(self):
         return list(self.adj.keys())
 
+    def community_map(self, force=False):
+        """获取（必要时惰性计算并缓存）Louvain 社群划分 {node: community_id}。
+
+        共同好友排序与前端社群着色共用同一份缓存，保证口径一致。
+        rebuild() 时缓存自动失效。
+        """
+        if self._communities is None or force:
+            from . import algorithms
+
+            self._communities = algorithms.louvain(self)
+        return self._communities
+
     def to_frontend(self):
         """导出为前端渲染所需的结构。"""
         nodes = [

@@ -24,7 +24,7 @@ const app = createApp({
       pathResult: "",
       cfA: "",
       cfB: "",
-      commonResult: "",
+      commonResult: null,
       pagerankTop: 10,
       pagerankList: [],
       communityInfo: null,
@@ -104,6 +104,36 @@ const app = createApp({
         {
           selector: ".dim",
           style: { opacity: 0.08 },
+        },
+        {
+          selector: "node.common-node",
+          style: {
+            "border-width": 2,
+            "border-color": "#37d0a0",
+            width: 18,
+            height: 18,
+            "z-index": 900,
+            "font-size": 8,
+          },
+        },
+        {
+          selector: "node.common-anchor",
+          style: {
+            "border-width": 3,
+            "border-color": "#ffd43b",
+            width: 24,
+            height: 24,
+            "z-index": 999,
+            "font-size": 9,
+          },
+        },
+        {
+          selector: "edge.common-edge",
+          style: {
+            width: 3,
+            "line-color": "#37d0a0",
+            opacity: 0.9,
+          },
         },
       ];
     },
@@ -233,12 +263,72 @@ const app = createApp({
     },
 
     async findCommonFriends() {
-      const { friends } = await this.api(
-        `/api/common_friends?node1=${encodeURIComponent(this.cfA)}&node2=${encodeURIComponent(this.cfB)}`
-      );
-      this.commonResult = friends.length
-        ? `共 ${friends.length} 个: ${friends.join(", ")}`
-        : "无共同好友";
+      // 节点不存在时后端返回 404 + 结构化 JSON，需要取出 body 而不是直接抛错
+      let data;
+      try {
+        data = await this.api(
+          `/api/common_friends?node1=${encodeURIComponent(this.cfA)}&node2=${encodeURIComponent(this.cfB)}`
+        );
+      } catch (e) {
+        this.commonResult = { status: "error", message: e.message };
+        this.resetCanvasHighlight();
+        return;
+      }
+
+      this.commonResult = data;
+      if (data.status === "ok") {
+        this.highlightCommonFriends(data);
+      } else {
+        // node_missing / same_node / no_common：不高亮，仅清掉画布旧状态
+        this.resetCanvasHighlight();
+      }
+    },
+
+    resetCanvasHighlight() {
+      this.cy
+        .elements()
+        .removeClass("highlight dim common-node common-anchor common-edge");
+    },
+
+    highlightCommonFriends(data) {
+      this.resetCanvasHighlight();
+      const anchors = new Set([data.node1, data.node2]);
+      const commonIds = new Set(data.ranked.map((r) => r.node));
+
+      this.cy.elements().addClass("dim");
+
+      const focus = this.cy.collection();
+      anchors.forEach((id) => {
+        const n = this.cy.getElementById(id);
+        if (n.length) focus.merge(n);
+      });
+      commonIds.forEach((id) => {
+        const n = this.cy.getElementById(id);
+        if (n.length) focus.merge(n);
+      });
+
+      // 两个查询对象之间、以及它们与每个共同好友之间的连线
+      anchors.forEach((a) => {
+        commonIds.forEach((c) => {
+          const e = this.cy.getElementById(edgeKey(a, c));
+          if (e.length) focus.merge(e);
+        });
+      });
+      const between = this.cy.getElementById(edgeKey(data.node1, data.node2));
+      if (between.length) focus.merge(between);
+
+      focus.removeClass("dim");
+      this.cy
+        .nodes()
+        .filter((n) => anchors.has(n.id()))
+        .addClass("common-anchor");
+      this.cy
+        .nodes()
+        .filter((n) => commonIds.has(n.id()))
+        .addClass("common-node");
+      focus.edges().addClass("common-edge");
+
+      this.cy.fit(focus, 60);
     },
 
     async runPagerank() {
@@ -264,9 +354,9 @@ const app = createApp({
     },
 
     clearHighlight() {
-      this.cy.elements().removeClass("highlight dim");
+      this.resetCanvasHighlight();
       this.pathResult = "";
-      this.commonResult = "";
+      this.commonResult = null;
     },
   },
 });

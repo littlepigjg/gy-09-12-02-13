@@ -59,7 +59,42 @@
             </select>
           </div>
           <button class="btn" @click="findCommonFriends" :disabled="loading || !cfA || !cfB">查询共同好友</button>
-          <div class="result" v-if="commonResult">{{ commonResult }}</div>
+
+          <div class="cf-result" v-if="commonResult">
+            <!-- 状态提示：节点不存在 / 同一人 / 无共同好友 / 请求失败 -->
+            <div class="cf-status" :class="'cf-' + commonResult.status" v-if="commonResult.status !== 'ok'">
+              {{ commonResult.message }}
+            </div>
+
+            <template v-else>
+              <div class="cf-head">
+                <b>{{ commonResult.node1_name }}</b> 与 <b>{{ commonResult.node2_name }}</b>
+                共有 <b class="cf-count">{{ commonResult.count }}</b> 个共同好友，已按亲疏远近排序
+              </div>
+              <div class="cf-rule">{{ commonResult.ranking_rule }}</div>
+
+              <ul class="cf-list">
+                <li v-for="item in commonResult.ranked" :key="item.node" class="cf-item">
+                  <div class="cf-item-head">
+                    <span class="cf-rank" :class="{ 'cf-top': item.rank <= 3 }">#{{ item.rank }}</span>
+                    <span class="cf-node">{{ item.name }}</span>
+                    <span class="cf-score">亲密度 {{ item.score }}</span>
+                  </div>
+                  <div class="cf-summary">{{ item.summary }}</div>
+                  <ul class="cf-reasons">
+                    <li v-for="(r, ri) in item.reasons" :key="ri">{{ r }}</li>
+                  </ul>
+                  <div class="cf-note">{{ item.position_note }}</div>
+                </li>
+              </ul>
+
+              <!-- 与旧版平铺名单核对：一个不少 -->
+              <details class="cf-flat">
+                <summary>完整名单核对（{{ commonResult.count }} 个，与排序名单一致）</summary>
+                {{ commonResult.friends.join(", ") }}
+              </details>
+            </template>
+          </div>
         </section>
 
         <section class="panel">

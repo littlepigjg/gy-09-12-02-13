@@ -180,6 +180,160 @@ html, body {
   word-break: break-all;
 }
 
+/* 共同好友排序结果 */
+.cf-result {
+  margin-top: 8px;
+}
+
+.cf-status {
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cf-node_missing,
+.cf-error {
+  background: #2d1a22;
+  border: 1px solid #6b2f3f;
+  color: #ff8fa3;
+}
+
+.cf-same_node {
+  background: #2d2818;
+  border: 1px solid #6b5f2f;
+  color: #ffd43b;
+}
+
+.cf-no_common {
+  background: #141a26;
+  border: 1px solid var(--panel-border);
+  color: var(--muted);
+}
+
+.cf-head {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.cf-count {
+  color: var(--accent-2);
+  font-size: 14px;
+}
+
+.cf-rule {
+  margin: 6px 0;
+  padding: 6px 8px;
+  background: #141a26;
+  border-left: 2px solid var(--accent);
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.cf-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.cf-item {
+  padding: 8px;
+  margin-bottom: 6px;
+  background: #141a26;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+.cf-item-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cf-rank {
+  color: var(--muted);
+  font-family: monospace;
+  font-size: 12px;
+  width: 26px;
+  flex-shrink: 0;
+}
+
+.cf-rank.cf-top {
+  color: #ffd43b;
+  font-weight: 700;
+}
+
+.cf-node {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-score {
+  color: var(--accent-2);
+  font-family: monospace;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.cf-summary {
+  margin: 5px 0 4px;
+  font-size: 12px;
+  color: var(--accent);
+  line-height: 1.45;
+}
+
+.cf-reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cf-reasons li {
+  position: relative;
+  padding-left: 10px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.cf-reasons li::before {
+  content: "·";
+  position: absolute;
+  left: 2px;
+}
+
+.cf-note {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px dashed #2a3348;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #b9c6da;
+}
+
+.cf-flat {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cf-flat summary {
+  cursor: pointer;
+}
+
+.cf-flat summary:hover {
+  color: var(--text);
+}
+
 .rank-list {
   list-style: none;
   margin: 8px 0 0;
