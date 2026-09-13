@@ -63,7 +63,23 @@
           <div class="cf-result" v-if="commonResult">
             <!-- 状态提示：节点不存在 / 同一人 / 无共同好友 / 请求失败 -->
             <div class="cf-status" :class="'cf-' + commonResult.status" v-if="commonResult.status !== 'ok'">
-              {{ commonResult.message }}
+              <template v-if="commonResult.status === 'node_missing'">
+                <div class="cf-badline">
+                  <span class="cf-badicon">✕</span> 节点不存在，查询无法进行
+                </div>
+                <div class="cf-missing-tags">
+                  <span v-for="m in commonResult.missing_nodes" :key="m" class="cf-tag-missing">
+                    {{ m }} <em>不存在</em>
+                  </span>
+                </div>
+                <div v-if="commonResult.existing_nodes && commonResult.existing_nodes.length" class="cf-existing">
+                  另一节点
+                  <span v-for="e in commonResult.existing_nodes" :key="e" class="cf-tag-exists">{{ e }}</span>
+                  存在
+                </div>
+                <div class="cf-hintline">{{ commonResult.message }}</div>
+              </template>
+              <template v-else>{{ commonResult.message }}</template>
             </div>
 
             <template v-else>

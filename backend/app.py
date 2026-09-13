@@ -115,10 +115,11 @@ def api_common_friends():
     community = graph.community_map()
     result = algorithms.rank_common_friends(graph, a, b, community=community)
 
-    # 状态严格区分：节点不存在 / 同一节点 / 确实没有共同好友，均不是错误参数，
-    # 用 status 字段判别；不存在时附带 404，与「没有共同好友」彻底分开
-    status_code = 404 if result["status"] == "node_missing" else 200
-    return jsonify(result), status_code
+    # 状态严格区分：节点不存在 / 同一节点 / 确实没有共同好友。
+    # 三者都是「查询有结果」而非请求错误，统一返回 HTTP 200，
+    # 由 body 中的 status 字段判别（node_missing / same_node / no_common / ok），
+    # 避免前端把 404 笼统当成「请求失败」、与「没有共同好友」混淆。
+    return jsonify(result)
 
 
 @app.route("/api/pagerank", methods=["GET"])

@@ -263,14 +263,18 @@ const app = createApp({
     },
 
     async findCommonFriends() {
-      // 节点不存在时后端返回 404 + 结构化 JSON，需要取出 body 而不是直接抛错
+      // 三种业务状态（节点不存在 / 同一节点 / 没有共同好友）后端都以 200 + status 返回；
+      // 只有网络故障或服务端 5xx 才走 catch，避免再把「查无此人」吞成笼统的请求失败
       let data;
       try {
         data = await this.api(
           `/api/common_friends?node1=${encodeURIComponent(this.cfA)}&node2=${encodeURIComponent(this.cfB)}`
         );
       } catch (e) {
-        this.commonResult = { status: "error", message: e.message };
+        this.commonResult = {
+          status: "error",
+          message: `查询失败：${e.message}（这是请求本身出错，不是「没有共同好友」，请重试）`,
+        };
         this.resetCanvasHighlight();
         return;
       }

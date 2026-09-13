@@ -134,14 +134,22 @@ def rank_common_friends(graph, a, b, community=None):
 
     missing = [x for x in (a, b) if not graph.has_node(x)]
     if missing:
+        existing = [x for x in (a, b) if graph.has_node(x)]
+        if len(missing) == 2:
+            detail = f"节点「{a}」和「{b}」在图中都不存在"
+        else:
+            detail = (
+                f"节点「{missing[0]}」在图中不存在"
+                + (f"（另一节点「{existing[0]}」存在）" if existing else "")
+            )
         return {
             **base,
             "status": "node_missing",
             "missing_nodes": missing,
+            "existing_nodes": existing,
             "message": (
-                f"节点不存在：{'、'.join(missing)}。图中查无此节点，"
-                "无法比较共同好友（请注意「节点不存在」和「没有共同好友」是两回事："
-                "前者是查无此人，后者是两人都在、只是好友圈没有交集）。"
+                f"{detail}，无法比较共同好友。请注意这与「没有共同好友」是两回事："
+                "前者是查无此人，后者是两个人都在图里、只是好友圈没有任何交集。"
             ),
         }
 
